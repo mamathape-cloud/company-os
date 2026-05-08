@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Alert, Button, CircularProgress, IconButton, InputAdornment, TextField } from "@mui/material";
 import { Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
 import AppIcon from "@/components/ui/AppIcon";
 import SplashScreen from "@/components/ui/SplashScreen";
 
@@ -17,8 +19,11 @@ const schema = z.object({
 
 type LoginInput = z.infer<typeof schema>;
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryToastShownRef = useRef(false);
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -29,6 +34,21 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors }
   } = useForm<LoginInput>({ resolver: zodResolver(schema), mode: "onBlur" });
+
+  useEffect(() => {
+    if (queryToastShownRef.current) {
+      return;
+    }
+    const notice = searchParams.get("notice");
+    const reset = searchParams.get("reset");
+    if (notice === "company_exists") {
+      toast.error("Company already configured. Please log in.");
+      queryToastShownRef.current = true;
+    } else if (reset === "success") {
+      toast.success("Password reset successful. Please log in.");
+      queryToastShownRef.current = true;
+    }
+  }, [searchParams]);
 
   async function onSubmit(values: LoginInput) {
     setLoading(true);
@@ -106,7 +126,29 @@ export default function LoginPage() {
             {loading ? <CircularProgress size={20} color="inherit" /> : "Login"}
           </Button>
         </form>
+
+        <p className="mt-4 text-center">
+          <Link href="/forgot-password" className="text-sm font-medium text-primary hover:underline">
+            Forgot password?
+          </Link>
+        </p>
       </div>
     </div>
+  );
+}
+
+function LoginFallback() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
+      <CircularProgress color="primary" />
+    </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginFallback />}>
+      <LoginForm />
+    </Suspense>
   );
 }

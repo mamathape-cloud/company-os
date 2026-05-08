@@ -64,19 +64,40 @@ export default function SetupPage() {
 
   async function onSubmit(values: CompanyInput) {
     try {
+      const logo =
+        values.logo && values.logo.startsWith("blob:")
+          ? ""
+          : (values.logo ?? "");
+
       const response = await fetch("/api/setup/company", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values)
+        body: JSON.stringify({ ...values, logo })
       });
 
-      const payload = (await response.json()) as { success: boolean; error?: string };
+      let payload: { success: boolean; error?: string };
+      try {
+        payload = (await response.json()) as { success: boolean; error?: string };
+      } catch {
+        toast.error("Failed to configure company");
+        return;
+      }
+
+      const companyAlreadyExists =
+        response.status === 400 && payload.error === "Company already configured";
+
+      if (companyAlreadyExists) {
+        toast.error("Company already configured. Please log in.");
+        router.push("/login?notice=company_exists");
+        return;
+      }
+
       if (!response.ok || !payload.success) {
         toast.error(payload.error ?? "Failed to configure company");
         return;
       }
 
-      toast.success("Company configured successfully");
+      toast.success("Company details saved. Let's create your admin account.");
       router.push("/setup/admin");
     } catch {
       toast.error("Failed to configure company");

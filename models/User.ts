@@ -16,6 +16,8 @@ export interface UserDocument extends mongoose.Document {
   isActive: boolean;
   accessControl: AccessControl[];
   companyId: mongoose.Types.ObjectId;
+  resetToken?: string | null;
+  resetTokenExpiry?: Date | null;
   isDeleted: boolean;
   deletedAt?: Date;
   createdBy?: mongoose.Types.ObjectId;
@@ -46,6 +48,8 @@ const userSchema = new Schema<UserDocument>(
     isActive: { type: Boolean, default: true },
     accessControl: { type: [accessControlSchema], default: [] },
     companyId: { type: Schema.Types.ObjectId, ref: "Company", required: true },
+    resetToken: { type: String },
+    resetTokenExpiry: { type: Date },
     isDeleted: { type: Boolean, default: false },
     deletedAt: { type: Date },
     createdBy: { type: Schema.Types.ObjectId, ref: "User" },

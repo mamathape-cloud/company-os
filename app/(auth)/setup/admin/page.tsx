@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { TextField, Button, InputAdornment, IconButton } from "@mui/material";
 import { Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
+import SplashScreen from "@/components/ui/SplashScreen";
 import { userSchema, UserInput } from "@/lib/validations/user";
 
 function getPasswordStrength(password: string): "Weak" | "Medium" | "Strong" {
@@ -21,6 +22,7 @@ export default function AdminSetupPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showSplash, setShowSplash] = useState(false);
 
   const {
     register,
@@ -48,11 +50,22 @@ export default function AdminSetupPage() {
         return;
       }
 
-      localStorage.setItem("splash_shown", "false");
-      router.push("/dashboard");
+      setShowSplash(true);
     } catch {
       toast.error("Failed to create admin user");
     }
+  }
+
+  if (showSplash) {
+    return (
+      <SplashScreen
+        message="Welcome to CompanyOS"
+        onComplete={() => {
+          localStorage.setItem("splash_shown", "true");
+          router.push("/dashboard");
+        }}
+      />
+    );
   }
 
   return (

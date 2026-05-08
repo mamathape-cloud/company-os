@@ -8,7 +8,13 @@ function isAuthPublic(pathname: string) {
 }
 
 function isBypass(pathname: string) {
-  return publicPaths.includes(pathname) || isAuthPublic(pathname);
+  return (
+    publicPaths.includes(pathname) ||
+    pathname.startsWith("/setup") ||
+    pathname.startsWith("/forgot-password") ||
+    pathname.startsWith("/reset-password") ||
+    isAuthPublic(pathname)
+  );
 }
 
 export async function middleware(request: NextRequest) {
