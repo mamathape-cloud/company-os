@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Invalid email or password" }, { status: 401 });
     }
 
-    const token = signToken({
+    const token = await signToken({
       userId: user._id.toString(),
       role: user.role,
       companyId: user.companyId.toString()

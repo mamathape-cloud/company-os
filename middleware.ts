@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
+import { verifyToken } from "@/lib/jwt";
 
 const publicPaths = ["/login", "/setup", "/api/health"];
 
@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
   }
 
   const token = request.cookies.get("token")?.value;
-  const decoded = token ? verifyToken(token) : null;
+  const decoded = token ? await verifyToken(token) : null;
 
   if (setupComplete && !decoded && !pathname.startsWith("/login") && !pathname.startsWith("/api/auth/")) {
     return NextResponse.redirect(new URL("/login", request.url));

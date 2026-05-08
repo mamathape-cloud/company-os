@@ -4,14 +4,14 @@ import { connectDB } from "@/lib/mongodb";
 import { companySchema } from "@/lib/validations/company";
 import Company from "@/models/Company";
 
-function getAuth(request: NextRequest) {
+async function getAuth(request: NextRequest) {
   const token = request.cookies.get("token")?.value;
-  return token ? verifyToken(token) : null;
+  return token ? await verifyToken(token) : null;
 }
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = getAuth(request);
+    const auth = await getAuth(request);
     if (!auth) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const auth = getAuth(request);
+    const auth = await getAuth(request);
     if (!auth) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
